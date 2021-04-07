@@ -32,11 +32,18 @@ def strategist(accounts):
 def keeper(accounts):
     yield accounts[5]
 
+@pytest.fixture
+def bob(accounts):
+    yield accounts[5]
 
 @pytest.fixture
 def token():
-    token_address = "0x6b175474e89094c44da98b954eedeac495271d0f"  # this should be the address of the ERC-20 used by the strategy/vault (DAI)
-    yield Contract(token_address)
+    yield Contract("0x049d68029688eabf473097a2fc38ef61633a3c7a")
+
+
+@pytest.fixture
+def token_whale(accounts):
+    yield accounts.at("0x3e4a7b48c03636dc9f5da7c3d54bf8326f02c8e0", force=True)
 
 
 @pytest.fixture
@@ -53,6 +60,11 @@ def amount(accounts, token):
 def weth():
     token_address = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     yield Contract(token_address)
+
+
+@pytest.fixture
+def curve_pool():
+    yield Contract("0xa42Bd395F183726d1a8774cFA795771F8ACFD777")
 
 
 @pytest.fixture
@@ -73,8 +85,8 @@ def vault(pm, gov, rewards, guardian, management, token):
 
 
 @pytest.fixture
-def strategy(strategist, keeper, vault, Strategy, gov):
-    strategy = strategist.deploy(Strategy, vault)
+def strategy(strategist, keeper, vault, FusdtCurveIce, gov):
+    strategy = strategist.deploy(FusdtCurveIce, vault, 1e6 * 2000)
     strategy.setKeeper(keeper)
     vault.addStrategy(strategy, 10_000, 0, 2 ** 256 - 1, 1_000, {"from": gov})
     yield strategy
